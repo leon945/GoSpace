@@ -1,6 +1,7 @@
 package loop
 
 import (
+	"ggame/util/constants"
 	"time"
 )
 
@@ -27,5 +28,5 @@ func (tk *TimeKeeper) End() {
 	deltaNano := currentTime.UnixNano() - tk.startTime.UnixNano()
 	deltaSeconds := float64(deltaNano) / float64(1000000000)
 
-	tk.setDeltaTime(deltaSeconds * 4000)
+	tk.setDeltaTime(deltaSeconds * constants.TimeScale)
 }

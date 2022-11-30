@@ -11,7 +11,7 @@ type Vector2 struct {
 }
 
 func Vector2_One() Vector2 {
-	return Vector2{X: 1, Y: 1}
+	return Vector2{X: .5, Y: .5}
 }
 
 func Vector2_Zero() Vector2 {

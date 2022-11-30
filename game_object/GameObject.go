@@ -85,7 +85,6 @@ func (g *GameObject) Start() {
 }
 
 func (g *GameObject) Update() {
-	//fmt.Println(len(GameObjects))
 	if g != nil && g.Enabled && g.Window != nil {
 		for _, el := range g.plugins {
 			if el != nil {

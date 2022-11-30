@@ -3,6 +3,7 @@ package gplugins
 import (
 	gameobject "ggame/game_object"
 	"ggame/gtypes"
+	"ggame/util/constants"
 )
 
 type RigidBody struct {
@@ -17,7 +18,6 @@ type RigidBody struct {
 }
 
 const deltaTimeMultiplier float64 = 10
-const distanceScale float64 = 1000
 
 func (rb *RigidBody) Init(gameObject *gameobject.GameObject, mass float64, airFriction float64, touchFriction float64) {
 	rb.SetGameObject(gameObject)
@@ -38,21 +38,21 @@ func (rb *RigidBody) Update() {
 }
 
 func (rb *RigidBody) applyForce() {
-	yChange := rb.force.Y * rb.ggo.TimeKeeper.DeltaTime() * deltaTimeMultiplier * (1 / rb.mass) * distanceScale
-	xChange := rb.force.X * rb.ggo.TimeKeeper.DeltaTime() * deltaTimeMultiplier * (1 / rb.mass) * distanceScale
+	yChange := rb.force.Y * rb.ggo.TimeKeeper.DeltaTime() * deltaTimeMultiplier * (1 / rb.mass) * constants.DistanceScale
+	xChange := rb.force.X * rb.ggo.TimeKeeper.DeltaTime() * deltaTimeMultiplier * (1 / rb.mass) * constants.DistanceScale
 	rb.velocity = gtypes.Vector2{X: rb.velocity.X + xChange, Y: rb.velocity.Y + yChange}
 }
 
 func (rb *RigidBody) applyGravity() {
-	yChange := rb.gravity * rb.ggo.TimeKeeper.DeltaTime() * deltaTimeMultiplier //* distanceScale
+	yChange := rb.gravity * rb.ggo.TimeKeeper.DeltaTime() * deltaTimeMultiplier //* constants.DistanceScale
 	rb.velocity = gtypes.Vector2{X: rb.velocity.X, Y: rb.velocity.Y + yChange}
 }
 
 func (rb *RigidBody) applyVelocity() {
 	if rb.velocity.Magnitude() > 0 {
 		cp := rb.ggo.Position
-		cp.Val.X += rb.velocity.X * rb.ggo.TimeKeeper.DeltaTime() * deltaTimeMultiplier * (1 / distanceScale)
-		cp.Val.Y += rb.velocity.Y * rb.ggo.TimeKeeper.DeltaTime() * deltaTimeMultiplier * (1 / distanceScale)
+		cp.Val.X += rb.velocity.X * rb.ggo.TimeKeeper.DeltaTime() * deltaTimeMultiplier * (1 / constants.DistanceScale)
+		cp.Val.Y += rb.velocity.Y * rb.ggo.TimeKeeper.DeltaTime() * deltaTimeMultiplier * (1 / constants.DistanceScale)
 	}
 }
 

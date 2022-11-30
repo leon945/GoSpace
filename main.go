@@ -6,6 +6,7 @@ import (
 	"ggame/loop"
 	planet_plugins "ggame/planet/plugins"
 	"ggame/util"
+	"ggame/util/constants"
 	"math/rand"
 	"time"
 
@@ -14,8 +15,6 @@ import (
 
 var isWindowSet bool = false
 var timeKeeper *loop.TimeKeeper
-var w int = 1200
-var h int = 800
 
 func main() {
 	timeKeeper = &loop.TimeKeeper{}
@@ -26,7 +25,7 @@ func main() {
 	//createRandomMoons("", gtypes.Vector2_Zero(), 400)
 	runGGOStarts()
 	timeKeeper.Start()
-	draw.RunWindow("Title", w, h, update)
+	draw.RunWindow("Title", constants.ScreenWidth, constants.ScreenHeight, update)
 }
 
 func update(window draw.Window) {
@@ -85,8 +84,8 @@ func runGGOUpdates() {
 func createRandomPlanets(amount int) {
 	rand.Seed(time.Now().UnixNano())
 	for i := 0; i < amount; i++ {
-		xPos := rand.Float64() * float64(w)
-		yPos := rand.Float64() * float64(h)
+		xPos := rand.Float64() * float64(constants.ScreenWidth)
+		yPos := rand.Float64() * float64(constants.ScreenHeight)
 
 		xV := rand.Float64() * 4
 		yV := rand.Float64() * 4
@@ -99,8 +98,8 @@ func createRandomPlanets(amount int) {
 			yV = -yV
 		}
 
-		var m float64 = 1 + (rand.Float64() * 316)
-		d := planet_plugins.GetDiameterFromMass(1, m)
+		var m float64 = constants.MinPlanetMass + (rand.Float64() * (constants.MaxNormalPlanetMass - constants.MinPlanetMass))
+		d := planet_plugins.GetDiameterFromMass(constants.PLANET_BODY_TYPE, m)
 
 		r := rand.Float32()
 		g := rand.Float32()
@@ -126,8 +125,8 @@ func createRandomPlanets(amount int) {
 func createRandomStars(amount int) {
 	rand.Seed(time.Now().UnixNano())
 	for i := 0; i < amount; i++ {
-		xPos := float64(w) / 2 // + rand.Float64()*600
-		yPos := float64(h) / 2 // + rand.Float64()*600
+		xPos := float64(constants.ScreenWidth) / 2  // + rand.Float64()*600
+		yPos := float64(constants.ScreenHeight) / 2 // + rand.Float64()*600
 
 		xV := rand.Float64() * .001
 		yV := rand.Float64() * 0
@@ -140,8 +139,8 @@ func createRandomStars(amount int) {
 			yV = -yV
 		}
 
-		var m float64 = 300000 + (rand.Float64() * 200000)
-		d := planet_plugins.GetDiameterFromMass(2, m)
+		var m float64 = constants.MinStarMass + (rand.Float64() * (constants.MaxStarMass - constants.MinStarMass))
+		d := planet_plugins.GetDiameterFromMass(constants.STAR_BODY_TYPE, m)
 
 		r := .8 + rand.Float32()*.2
 		g := rand.Float32() * .1
@@ -166,9 +165,9 @@ func createRandomStars(amount int) {
 
 func createGasGiantsAndMoons(amount int) {
 	for i := 0; i < amount; i++ {
-		xPos := rand.Float64() * float64(w)
-		yPos := rand.Float64() * float64(h)
-		var m float64 = 200 + (rand.Float64() * 200)
+		xPos := rand.Float64() * float64(constants.ScreenWidth)
+		yPos := rand.Float64() * float64(constants.ScreenHeight)
+		var m float64 = constants.MinGasGiantMass + (rand.Float64() * (constants.MaxGasGiantMass - constants.MinGasGiantMass))
 		d := planet_plugins.GetDiameterFromMass(1, m)
 
 		r := rand.Float32()
@@ -208,8 +207,8 @@ func createRandomMoons(parentPlanetId string, planetPos gtypes.Vector2, amount i
 		yV := rand.Float64() * .1
 
 		if parentPlanetId == "" {
-			xPos = rand.Float64() * 1900
-			yPos = rand.Float64() * 1000
+			xPos = rand.Float64() * float64(constants.ScreenWidth)
+			yPos = rand.Float64() * float64(constants.ScreenHeight)
 
 			if rand.Intn(100) > 50 {
 				xV = -xV
@@ -220,8 +219,8 @@ func createRandomMoons(parentPlanetId string, planetPos gtypes.Vector2, amount i
 			}
 		}
 
-		var m float64 = .001 + (rand.Float64() * .1)
-		d := planet_plugins.GetDiameterFromMass(0, m)
+		var m float64 = constants.MinMoonMass + (rand.Float64() * (constants.MaxMoonMass - constants.MinMoonMass))
+		d := planet_plugins.GetDiameterFromMass(constants.MOON_BODY_TYPE, m)
 
 		c := rand.Float32() * .7
 

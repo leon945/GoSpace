@@ -7,6 +7,7 @@ import (
 	"ggame/gtypes"
 	"ggame/loop"
 	"ggame/util"
+	"ggame/util/constants"
 	"math"
 	"math/rand"
 	"time"
@@ -74,7 +75,7 @@ func (p *Planet) checkForCollisions(allPlanetsPlugins *[]gameobject.Pluginer) {
 			vectorToPlanet := p.getVectorTo(planet)
 			distanceToPlanet := vectorToPlanet.Magnitude()
 
-			if distanceToPlanet < .5 {
+			if distanceToPlanet < constants.MaxDistanceForPlanetCollision {
 				collidingPlanets = append(collidingPlanets, planet)
 				collidedMass += planet.GetMass()
 				newXPos += planet.GetPosition().X
@@ -112,18 +113,18 @@ func (p *Planet) checkForCollisions(allPlanetsPlugins *[]gameobject.Pluginer) {
 	r := rand.Float32()
 	g := rand.Float32()
 	b := rand.Float32()
-	d := GetDiameterFromMass(1, newTotalMass)
+	d := GetDiameterFromMass(constants.PLANET_BODY_TYPE, newTotalMass)
 
-	if newTotalMass < 1 {
+	if newTotalMass < constants.MinPlanetMass {
 		r = r * .7
 		g = r
 		b = r
-		d = GetDiameterFromMass(0, newTotalMass)
-	} else if newTotalMass > 4200 {
+		d = GetDiameterFromMass(constants.MOON_BODY_TYPE, newTotalMass)
+	} else if newTotalMass > constants.MaxPlanetMass {
 		r = .8 + rand.Float32()*.2
 		g = rand.Float32() * .1
 		b = rand.Float32() * .5
-		d = GetDiameterFromMass(2, newTotalMass)
+		d = GetDiameterFromMass(constants.STAR_BODY_TYPE, newTotalMass)
 	}
 
 	nPlanet := CreatePlanetGameObject(
@@ -137,9 +138,9 @@ func (p *Planet) checkForCollisions(allPlanetsPlugins *[]gameobject.Pluginer) {
 		p.ParentPlanetId,
 	)
 	nPPlugin := nPlanet.GetPlugin(util.TypeofObject(&Planet{})).(*Planet)
-	if newTotalMass < 1 {
+	if newTotalMass < constants.MinPlanetMass {
 		nPPlugin.SetAsMoon()
-	} else if newTotalMass > 1 && newTotalMass < 5000 {
+	} else if newTotalMass > constants.MinPlanetMass && newTotalMass < constants.MaxPlanetMass {
 		nPPlugin.SetAsPlanet()
 	} else {
 		nPPlugin.SetAsStar()
@@ -182,7 +183,7 @@ func (p *Planet) getGravityForce(other *Planet) gtypes.Vector2 {
 	centerGravity := p.getVectorTo(other)
 	distanceFromCenter := centerGravity.Magnitude()
 	centerGravityN := *centerGravity.Normalize()
-	scaledDistance := distanceFromCenter * p.getDistanceScale(other)
+	scaledDistance := distanceFromCenter * p.GetDistanceScale(other)
 
 	gravityValue := (1 / math.Pow(scaledDistance, 2)) * otherMass
 
@@ -204,8 +205,11 @@ func (p *Planet) getVectorTo(other *Planet) gtypes.Vector2 {
 	return otherVector
 }
 
-func (p *Planet) getDistanceScale(other *Planet) float64 {
-	var scale float64 = 1000
+func (p *Planet) GetDistanceScale(other *Planet) float64 {
+
+	if other == nil {
+		return constants.DistanceScale
+	}
 	// oBodyType := other.bodyType
 	// switch p.bodyType {
 	// case 0: //MOONS
@@ -234,7 +238,7 @@ func (p *Planet) getDistanceScale(other *Planet) float64 {
 	// 	}
 	// }
 
-	return scale
+	return constants.DistanceScale
 }
 
 func (p *Planet) Destroy() {
@@ -270,15 +274,15 @@ func (p *Planet) GetVelocity() gtypes.Vector2 {
 }
 
 func (p *Planet) SetAsMoon() {
-	p.bodyType = 0
+	p.bodyType = constants.MOON_BODY_TYPE
 }
 
 func (p *Planet) SetAsPlanet() {
-	p.bodyType = 1
+	p.bodyType = constants.PLANET_BODY_TYPE
 }
 
 func (p *Planet) SetAsStar() {
-	p.bodyType = 2
+	p.bodyType = constants.STAR_BODY_TYPE
 }
 
 func CreatePlanetGameObject(
@@ -309,7 +313,7 @@ func CreatePlanetGameObject(
 	ggo.AddPlugin(&planet)
 
 	renderer := &gplugins_PlanetRenderer.PlanetRenderer{}
-	renderer.Init(&ggo, color, mass > 4200)
+	renderer.Init(&ggo, color, mass > constants.MaxPlanetMass)
 	ggo.AddPlugin(renderer)
 
 	return &ggo
@@ -328,16 +332,14 @@ func UpdatePlanetParents(allPlanets []*Planet, dyingPlanets []*Planet, idOfNewPa
 func GetDiameterFromMass(bodyType int, mass float64) float64 {
 	var d float64 = 1
 	switch bodyType {
-	case 0: //MOONS
+	case constants.MOON_BODY_TYPE: //MOONS
 		d = 5 + math.Sqrt(mass/math.Pi)*2
-	case 1: //PLANETS
+	case constants.PLANET_BODY_TYPE: //PLANETS
 		d = 5 + math.Sqrt((mass)/math.Pi)*2
-	case 2: //STARS
+	case constants.STAR_BODY_TYPE: //STARS
 		d = 10 + math.Sqrt((mass*.02)/math.Pi)*2
 		d *= .4
 	}
-
-	//d *= .4
 
 	return d
 }
