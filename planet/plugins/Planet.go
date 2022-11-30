@@ -74,7 +74,7 @@ func (p *Planet) checkForCollisions(allPlanetsPlugins *[]gameobject.Pluginer) {
 			vectorToPlanet := p.getVectorTo(planet)
 			distanceToPlanet := vectorToPlanet.Magnitude()
 
-			if distanceToPlanet < 1 {
+			if distanceToPlanet < .5 {
 				collidingPlanets = append(collidingPlanets, planet)
 				collidedMass += planet.GetMass()
 				newXPos += planet.GetPosition().X
@@ -144,9 +144,6 @@ func (p *Planet) checkForCollisions(allPlanetsPlugins *[]gameobject.Pluginer) {
 	} else {
 		nPPlugin.SetAsStar()
 	}
-
-	nPPlugin.SetAsPlanet()
-	nPPlugin.rigidBody.SetForce(newTotalForce)
 
 	var planetsToKill []*Planet
 	planetsToKill = append(planetsToKill, collidingPlanets...)

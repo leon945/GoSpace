@@ -19,7 +19,7 @@ var h int = 800
 
 func main() {
 	timeKeeper = &loop.TimeKeeper{}
-	//test1()
+	// test1()
 	createRandomStars(1)
 	createRandomPlanets(100)
 	//createGasGiantsAndMoons(10)
@@ -244,7 +244,7 @@ func createRandomMoons(parentPlanetId string, planetPos gtypes.Vector2, amount i
 
 func test1() {
 	createTestPlanet(0, 500, 10, 0, 2000)
-	createTestPlanet(800, 500, -10, 0, 3100)
+	createTestPlanet(800, 500, -10, 0, 2000)
 }
 
 func createTestPlanet(xPos float64, yPos float64, xVel float64, yVel float64, mass float64) {

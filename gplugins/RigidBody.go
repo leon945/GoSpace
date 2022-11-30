@@ -44,7 +44,7 @@ func (rb *RigidBody) applyForce() {
 }
 
 func (rb *RigidBody) applyGravity() {
-	yChange := rb.gravity * rb.ggo.TimeKeeper.DeltaTime() * deltaTimeMultiplier * distanceScale
+	yChange := rb.gravity * rb.ggo.TimeKeeper.DeltaTime() * deltaTimeMultiplier //* distanceScale
 	rb.velocity = gtypes.Vector2{X: rb.velocity.X, Y: rb.velocity.Y + yChange}
 }
 
