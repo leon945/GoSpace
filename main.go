@@ -15,12 +15,16 @@ import (
 
 var isWindowSet bool = false
 var timeKeeper *loop.TimeKeeper
+var mouseDownPos gtypes.Vector2
+var mouseUpPos gtypes.Vector2
+var startMouseBtn draw.MouseButton
+var isMouseDown bool = false
 
 func main() {
 	timeKeeper = &loop.TimeKeeper{}
 	// test1()
-	createRandomStars(1)
-	createRandomPlanets(100)
+	//createRandomStars(1)
+	//createRandomPlanets(200)
 	//createGasGiantsAndMoons(10)
 	//createRandomMoons("", gtypes.Vector2_Zero(), 400)
 	runGGOStarts()
@@ -67,6 +71,48 @@ func update(window draw.Window) {
 	// 		window.Close()
 	// 	}
 	// }
+
+	// check all mouse clicks that happened during this frame
+	rand.Seed(time.Now().UnixNano())
+	if !isMouseDown {
+		clicks := window.Clicks()
+		if len(clicks) > 0 {
+			click := window.Clicks()[0]
+			if click.Button == draw.MiddleButton {
+				createRandomPlanets(100, &window)
+			} else {
+				isMouseDown = true
+				startMouseBtn = click.Button
+				mouseDownPos = gtypes.Vector2{X: float64(click.X), Y: float64(click.Y)}
+			}
+		}
+	}
+
+	if isMouseDown {
+		x, y := window.MousePosition()
+		if startMouseBtn == draw.LeftButton {
+			window.DrawLine(int(mouseDownPos.X), int(mouseDownPos.Y), x, y, draw.White)
+		} else {
+			window.DrawLine(int(mouseDownPos.X), int(mouseDownPos.Y), x, y, draw.Red)
+		}
+	}
+
+	if isMouseDown && !window.IsMouseDown(startMouseBtn) {
+		isMouseDown = false
+		x, y := window.MousePosition()
+		mouseUpPos = gtypes.Vector2{X: float64(x), Y: float64(y)}
+
+		mass := constants.MinPlanetMass + (rand.Float64() * (constants.MaxNormalPlanetMass - constants.MinPlanetMass))
+		if startMouseBtn == draw.RightButton {
+			mass = constants.MinStarMass + (rand.Float64() * (constants.MaxStarMass - constants.MinStarMass))
+		}
+
+		xVel := (mouseUpPos.X - mouseDownPos.X) * .01
+		yVel := (mouseUpPos.Y - mouseDownPos.Y) * .01
+
+		createTestPlanet(float64(mouseDownPos.X), float64(mouseDownPos.Y), xVel, yVel, mass, &window)
+	}
+
 }
 
 func runGGOStarts() {
@@ -81,7 +127,7 @@ func runGGOUpdates() {
 	}
 }
 
-func createRandomPlanets(amount int) {
+func createRandomPlanets(amount int, window *draw.Window) {
 	rand.Seed(time.Now().UnixNano())
 	for i := 0; i < amount; i++ {
 		xPos := rand.Float64() * float64(constants.ScreenWidth)
@@ -101,20 +147,20 @@ func createRandomPlanets(amount int) {
 		var m float64 = constants.MinPlanetMass + (rand.Float64() * (constants.MaxNormalPlanetMass - constants.MinPlanetMass))
 		d := planet_plugins.GetDiameterFromMass(constants.PLANET_BODY_TYPE, m)
 
-		r := rand.Float32()
-		g := rand.Float32()
-		b := rand.Float32()
+		color := planet_plugins.GetColorFromBodyType(constants.PLANET_BODY_TYPE)
 
 		nPlanet := planet_plugins.CreatePlanetGameObject(
 			float64(xPos),
 			float64(yPos),
 			d,
 			m,
-			draw.Color{A: 1, R: r, G: g, B: b},
+			color,
 			gtypes.Vector2{X: float64(xV), Y: float64(yV)},
 			timeKeeper,
 			"",
 		)
+
+		nPlanet.Window = window
 		nPPlugin := nPlanet.GetPlugin(util.TypeofObject(&planet_plugins.Planet{})).(*planet_plugins.Planet)
 		nPPlugin.SetAsPlanet()
 		nPlanet.AllGameObjects = &ggo.GameObjects
@@ -142,16 +188,14 @@ func createRandomStars(amount int) {
 		var m float64 = constants.MinStarMass + (rand.Float64() * (constants.MaxStarMass - constants.MinStarMass))
 		d := planet_plugins.GetDiameterFromMass(constants.STAR_BODY_TYPE, m)
 
-		r := .8 + rand.Float32()*.2
-		g := rand.Float32() * .1
-		b := rand.Float32() * .5
+		color := planet_plugins.GetColorFromBodyType(constants.STAR_BODY_TYPE)
 
 		nPlanet := planet_plugins.CreatePlanetGameObject(
 			float64(xPos),
 			float64(yPos),
 			d,
 			m,
-			draw.Color{A: 1, R: r, G: g, B: b},
+			color,
 			gtypes.Vector2{X: float64(xV), Y: float64(yV)},
 			timeKeeper,
 			"",
@@ -170,9 +214,7 @@ func createGasGiantsAndMoons(amount int) {
 		var m float64 = constants.MinGasGiantMass + (rand.Float64() * (constants.MaxGasGiantMass - constants.MinGasGiantMass))
 		d := planet_plugins.GetDiameterFromMass(1, m)
 
-		r := rand.Float32()
-		g := rand.Float32() * .4
-		b := rand.Float32() * .1
+		color := planet_plugins.GetColorFromBodyType(constants.PLANET_BODY_TYPE)
 
 		xV := rand.Float64() * 2
 		yV := rand.Float64() * .2
@@ -182,7 +224,7 @@ func createGasGiantsAndMoons(amount int) {
 			yPos,
 			d,
 			m,
-			draw.Color{A: 1, R: r, G: g, B: b},
+			color,
 			gtypes.Vector2{X: float64(xV), Y: float64(yV)},
 			timeKeeper,
 			"",
@@ -222,14 +264,14 @@ func createRandomMoons(parentPlanetId string, planetPos gtypes.Vector2, amount i
 		var m float64 = constants.MinMoonMass + (rand.Float64() * (constants.MaxMoonMass - constants.MinMoonMass))
 		d := planet_plugins.GetDiameterFromMass(constants.MOON_BODY_TYPE, m)
 
-		c := rand.Float32() * .7
+		color := planet_plugins.GetColorFromBodyType(constants.MOON_BODY_TYPE)
 
 		nPlanet := planet_plugins.CreatePlanetGameObject(
 			float64(xPos),
 			float64(yPos),
 			d,
 			m,
-			draw.Color{A: 1, R: c, G: c, B: c},
+			color,
 			gtypes.Vector2{X: float64(xV), Y: float64(yV)},
 			timeKeeper,
 			parentPlanetId,
@@ -242,27 +284,33 @@ func createRandomMoons(parentPlanetId string, planetPos gtypes.Vector2, amount i
 }
 
 func test1() {
-	createTestPlanet(0, 500, 10, 0, 2000)
-	createTestPlanet(800, 500, -10, 0, 2000)
+	createTestPlanet(0, 500, 10, 0, 2000, nil)
+	createTestPlanet(800, 500, -10, 0, 2000, nil)
 }
 
-func createTestPlanet(xPos float64, yPos float64, xVel float64, yVel float64, mass float64) {
-	d := planet_plugins.GetDiameterFromMass(1, mass)
+func createTestPlanet(xPos float64, yPos float64, xVel float64, yVel float64, mass float64, window *draw.Window) {
+	var bodyType int = constants.PLANET_BODY_TYPE
+	if mass > constants.MinStarMass {
+		bodyType = constants.STAR_BODY_TYPE
+	}
+	d := planet_plugins.GetDiameterFromMass(bodyType, mass)
 
-	r := rand.Float32()
-	g := rand.Float32() * .4
-	b := rand.Float32() * .1
+	color := planet_plugins.GetColorFromBodyType(bodyType)
 
 	nPlanet := planet_plugins.CreatePlanetGameObject(
 		xPos,
 		yPos,
 		d,
 		mass,
-		draw.Color{A: 1, R: r, G: g, B: b},
+		color,
 		gtypes.Vector2{X: float64(xVel), Y: float64(yVel)},
 		timeKeeper,
 		"",
 	)
+	if window != nil {
+		nPlanet.Window = window
+	}
+
 	nPPlugin := nPlanet.GetPlugin(util.TypeofObject(&planet_plugins.Planet{})).(*planet_plugins.Planet)
 	nPPlugin.SetAsPlanet()
 	nPlanet.AllGameObjects = &ggo.GameObjects
