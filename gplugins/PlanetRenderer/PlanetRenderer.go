@@ -3,6 +3,7 @@ package gplugins_PlanetRenderer
 import (
 	gameobject "ggame/game_object"
 	"ggame/gplugins"
+	"ggame/util/constants"
 
 	"github.com/gonutz/prototype/draw"
 )
@@ -32,6 +33,10 @@ func (cr *PlanetRenderer) Update() {
 	}
 
 	ggo := cr.ggo
+
+	if ggo.Position.Val.X < 0 || ggo.Position.Val.X > float64(constants.ScreenWidth) || ggo.Position.Val.Y < 0 || ggo.Position.Val.Y > float64(constants.ScreenHeight) {
+		return
+	}
 
 	topLeft := ggo.GetTopLeft()
 	size := ggo.Size.Val

@@ -343,3 +343,34 @@ func GetDiameterFromMass(bodyType int, mass float64) float64 {
 
 	return d
 }
+
+func GetColorFromBodyType(bodyType int) (color draw.Color) {
+	rand.Seed(time.Now().UnixNano())
+	var r, g, b float32
+	switch bodyType {
+	case constants.MOON_BODY_TYPE: //MOONS
+		r = rand.Float32()
+		g = r
+		b = r
+	case constants.PLANET_BODY_TYPE: //PLANETS
+		r = rand.Float32()
+		g = rand.Float32()
+		b = rand.Float32()
+	case constants.STAR_BODY_TYPE: //STARS
+		r = .5 + rand.Float32()*.5
+		g = rand.Float32()
+		if g > .4 {
+			b = 0
+		} else {
+			g = 0
+			b = rand.Float32()
+		}
+	}
+
+	color.R = r
+	color.G = g
+	color.B = b
+	color.A = 1
+
+	return
+}
