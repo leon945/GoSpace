@@ -3,7 +3,8 @@ package constants
 const ScreenWidth int = 1200
 const ScreenHeight int = 800
 
-const TimeScale float64 = 4000
+var TimeScale float64 = 4000
+
 const DistanceScale float64 = 1000
 
 const MinMoonMass float64 = .001
@@ -23,3 +24,19 @@ const PLANET_BODY_TYPE int = 1
 const STAR_BODY_TYPE int = 2
 
 const MaxDistanceForPlanetCollision float64 = 1
+
+func IncreaseTimeScale() {
+	if TimeScale < 16000 {
+		TimeScale *= 2
+	} else {
+		TimeScale = 16000
+	}
+}
+
+func DecreaseTimeScale() {
+	if TimeScale > 500 {
+		TimeScale /= 2
+	} else {
+		TimeScale = 500
+	}
+}

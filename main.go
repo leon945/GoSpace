@@ -8,6 +8,7 @@ import (
 	"ggame/util"
 	"ggame/util/constants"
 	"math/rand"
+	"strconv"
 	"time"
 
 	"github.com/gonutz/prototype/draw"
@@ -45,6 +46,13 @@ func update(window draw.Window) {
 	runGGOUpdates()
 	handleMouse(window)
 	handleKeyboard(window)
+	drawUI(window)
+}
+
+func drawUI(window draw.Window) {
+	var timeScale float64 = constants.TimeScale / 1000
+	text := strconv.FormatFloat(timeScale, 'f', 1, 64) + "X"
+	window.DrawText(text, 20, 20, draw.White)
 }
 
 func handleMouse(window draw.Window) {
@@ -91,14 +99,23 @@ func handleMouse(window draw.Window) {
 }
 
 func handleKeyboard(window draw.Window) {
-	if window.IsKeyDown(draw.KeyEscape) {
+
+	if window.WasKeyPressed(draw.KeyEscape) {
 		for _, gameObj := range ggo.GameObjects {
 			ggo.MarkForDeletion(gameObj)
 		}
 	}
 
-	if window.IsKeyDown(draw.KeyQ) {
+	if window.WasKeyPressed(draw.KeyQ) {
 		window.Close()
+	}
+
+	if window.WasKeyPressed(draw.KeyRight) {
+		constants.IncreaseTimeScale()
+	}
+
+	if window.WasKeyPressed(draw.KeyLeft) {
+		constants.DecreaseTimeScale()
 	}
 }
 
