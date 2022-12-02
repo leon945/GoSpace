@@ -8,6 +8,10 @@ Right click + drag to create stars.
 
 Middle click to create 100 random planets.
 
+Left Arrow key to slow down time.
+
+Right Arrow key to speed up time.
+
 ESC key to delete all objects.
 
 Q key to quit.
